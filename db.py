@@ -147,6 +147,48 @@ def fetch_all() -> list:
         ).fetchall()
 
 
+def fetch_by_exact(
+    hand: str,
+    stage: str,
+    community_cards: str,
+    num_opponents: int,
+) -> Optional[sqlite3.Row]:
+    """Fetch one row by exact scenario key."""
+    with _get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT * FROM simulations
+             WHERE hand = ? AND stage = ? AND community_cards = ?
+               AND num_opponents = ?
+            """,
+            (hand, stage, community_cards, num_opponents),
+        ).fetchone()
+
+
+def fetch_least_simulated(stage: str = "River") -> Optional[sqlite3.Row]:
+    """Return the least simulated row for a given stage."""
+    with _get_connection() as conn:
+        return conn.execute(
+            """
+            SELECT * FROM simulations
+             WHERE stage = ?
+             ORDER BY total ASC, updated_at ASC
+             LIMIT 1
+            """,
+            (stage,),
+        ).fetchone()
+
+
+def count_stage_rows(stage: str = "River") -> int:
+    """Return number of rows for a given stage."""
+    with _get_connection() as conn:
+        row = conn.execute(
+            "SELECT COUNT(*) AS c FROM simulations WHERE stage = ?",
+            (stage,),
+        ).fetchone()
+        return int(row["c"]) if row else 0
+
+
 def export_snapshot(snapshot_file: str = DB_SNAPSHOT_FILE) -> Path:
     """Export current DB rows to a JSON snapshot that can be committed to Git."""
     rows = fetch_all()

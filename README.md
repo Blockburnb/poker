@@ -40,6 +40,16 @@ pip install -r requirements.txt
 python main.py
 ```
 
+Additional entry points:
+
+```bash
+# Read-only consultation from DB (no Monte Carlo)
+python consult_oracle.py
+
+# Automatic River data producer (continuous 1000-iteration batches)
+python produce_data.py
+```
+
 The tool will guide you step-by-step:
 
 1. **Number of opponents** – how many players you are up against (1–9).
@@ -141,6 +151,9 @@ Recommended workflow:
   accumulated data.
 3. After `git clone` or `git pull`, run `python main.py` once to restore
   missing rows into your local `poker_oracle.db`.
+
+Both `consult_oracle.py` and `produce_data.py` also import the snapshot on
+startup and export updates when new data is produced.
 
 ---
 
