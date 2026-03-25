@@ -9,10 +9,13 @@ into the existing row so that statistical precision improves over time.
 """
 
 import sqlite3
+import json
+from pathlib import Path
 from datetime import datetime
 from typing import Optional, Tuple
 
 DB_FILE = "poker_oracle.db"
+DB_SNAPSHOT_FILE = "db_snapshot.json"
 
 
 def _get_connection() -> sqlite3.Connection:
@@ -142,3 +145,75 @@ def fetch_all() -> list:
         return conn.execute(
             "SELECT * FROM simulations ORDER BY updated_at DESC"
         ).fetchall()
+
+
+def export_snapshot(snapshot_file: str = DB_SNAPSHOT_FILE) -> Path:
+    """Export current DB rows to a JSON snapshot that can be committed to Git."""
+    rows = fetch_all()
+    payload = {
+        "version": 1,
+        "exported_at": datetime.now().isoformat(timespec="seconds"),
+        "simulations": [dict(row) for row in rows],
+    }
+    out = Path(snapshot_file)
+    out.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    return out
+
+
+def import_snapshot(snapshot_file: str = DB_SNAPSHOT_FILE) -> int:
+    """
+    Import rows from a JSON snapshot into SQLite.
+
+    Returns the number of inserted rows. Existing scenario keys are skipped.
+    """
+    path = Path(snapshot_file)
+    if not path.exists():
+        return 0
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    rows = payload.get("simulations", [])
+    inserted = 0
+
+    with _get_connection() as conn:
+        for row in rows:
+            existing = conn.execute(
+                """
+                SELECT id FROM simulations
+                 WHERE hand = ? AND stage = ? AND community_cards = ?
+                   AND num_opponents = ?
+                """,
+                (
+                    row.get("hand", ""),
+                    row.get("stage", ""),
+                    row.get("community_cards", ""),
+                    row.get("num_opponents", 0),
+                ),
+            ).fetchone()
+            if existing:
+                continue
+
+            conn.execute(
+                """
+                INSERT INTO simulations
+                       (hand, stage, community_cards, num_opponents,
+                        wins, ties, losses, total, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    row.get("hand", ""),
+                    row.get("stage", ""),
+                    row.get("community_cards", ""),
+                    row.get("num_opponents", 0),
+                    row.get("wins", 0),
+                    row.get("ties", 0),
+                    row.get("losses", 0),
+                    row.get("total", 0),
+                    row.get("created_at") or datetime.now().isoformat(timespec="seconds"),
+                    row.get("updated_at") or datetime.now().isoformat(timespec="seconds"),
+                ),
+            )
+            inserted += 1
+
+        conn.commit()
+
+    return inserted

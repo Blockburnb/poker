@@ -81,6 +81,7 @@ def _run_stage(
         result["losses"],
         result["total"],
     )
+    db.export_snapshot()
 
     # Display
     ui.display_results(stage_name, hand, community_cards, result, num_opponents, prior_dict)
@@ -93,7 +94,13 @@ def _run_stage(
 
 def main() -> None:
     db.init_db()
+    imported = db.import_snapshot()
     ui.display_title()
+
+    if imported > 0:
+        ui.console.print(
+            f"[dim]Loaded {imported} scenario(s) from db_snapshot.json.[/dim]"
+        )
 
     # ── Optional: show history ─────────────────────────────────────────────
     if Confirm.ask(

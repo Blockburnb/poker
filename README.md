@@ -121,6 +121,27 @@ sqlite3 poker_oracle.db
 sqlite> SELECT hand, stage, total, ROUND((wins + ties*0.5)*100.0/total, 2) AS equity FROM simulations;
 ```
 
+## Git sync for stored data
+
+The live SQLite file (`poker_oracle.db`) is intentionally ignored by Git.
+To make your simulation history recoverable after cloning/pulling the repo,
+the app maintains a versioned JSON snapshot:
+
+- `db_snapshot.json` is exported automatically after each saved simulation.
+- On startup, `main.py` imports `db_snapshot.json` into the local SQLite DB
+  when matching rows do not already exist.
+
+This gives you a Git-friendly history format while keeping runtime reads/writes
+fast in SQLite.
+
+Recommended workflow:
+
+1. Run simulations (`python main.py`).
+2. Commit `db_snapshot.json` when you want to share or back up your latest
+  accumulated data.
+3. After `git clone` or `git pull`, run `python main.py` once to restore
+  missing rows into your local `poker_oracle.db`.
+
 ---
 
 ## Development notes
