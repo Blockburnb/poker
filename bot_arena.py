@@ -317,8 +317,9 @@ def _run_round_robin() -> None:
     _render_cumulative(cumulative_rows)
 
 
-def main() -> None:
-    ui.display_title()
+def run_arena_mode(show_title: bool = True) -> None:
+    if show_title:
+        ui.display_title()
     ui.console.rule("[bold cyan]Bot Strategy Arena[/bold cyan]")
     ui.console.print(
         "[dim]Compare strategies quickly, run round-robin, and optionally play as Human.[/dim]"
@@ -348,6 +349,10 @@ def main() -> None:
             break
 
     ui.console.print("[green]Bye from Bot Strategy Arena.[/green]")
+
+
+def main() -> None:
+    run_arena_mode(show_title=True)
 
 
 if __name__ == "__main__":

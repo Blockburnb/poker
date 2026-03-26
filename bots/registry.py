@@ -8,6 +8,7 @@ from bots.builtin import (
     CallingStationBot,
     LooseAggressiveBot,
     ManiacBot,
+    MonteCarlo10K10Bot,
     MonteCarlo10K51Bot,
     MonteCarlo10KBot,
     RandomBot,
@@ -24,6 +25,7 @@ class StrategyFactory:
 
 
 _BASE_REGISTRY: dict[str, StrategyFactory] = {
+    "mc10k_10": StrategyFactory(MonteCarlo10K10Bot.info, MonteCarlo10K10Bot),
     "mc10k_51": StrategyFactory(MonteCarlo10K51Bot.info, MonteCarlo10K51Bot),
     "mc10k_75": StrategyFactory(MonteCarlo10KBot.info, MonteCarlo10KBot),
     "tag": StrategyFactory(TightAggressiveBot.info, TightAggressiveBot),

@@ -1,0 +1,77 @@
+{
+  "strategies": {
+    "calling_station": {
+      "hands": 1600000,
+      "matches": 8000,
+      "strategy_name": "Calling Station",
+      "total_profit": 656628,
+      "tournaments": 1000,
+      "updated_at": "2026-03-26T22:08:53"
+    },
+    "gto_template_policy": {
+      "hands": 1600000,
+      "matches": 8000,
+      "strategy_name": "GTO: Template Policy",
+      "total_profit": -176600,
+      "tournaments": 1000,
+      "updated_at": "2026-03-26T22:08:53"
+    },
+    "lag": {
+      "hands": 1600000,
+      "matches": 8000,
+      "strategy_name": "Loose-Aggressive (LAG)",
+      "total_profit": 122951,
+      "tournaments": 1000,
+      "updated_at": "2026-03-26T22:08:53"
+    },
+    "maniac": {
+      "hands": 1600000,
+      "matches": 8000,
+      "strategy_name": "Maniac",
+      "total_profit": 578915,
+      "tournaments": 1000,
+      "updated_at": "2026-03-26T22:08:53"
+    },
+    "mc10k_10": {
+      "hands": 1600000,
+      "matches": 8000,
+      "strategy_name": "Monte Carlo 10K (10%)",
+      "total_profit": 680470,
+      "tournaments": 1000,
+      "updated_at": "2026-03-26T22:08:53"
+    },
+    "mc10k_51": {
+      "hands": 1600000,
+      "matches": 8000,
+      "strategy_name": "Monte Carlo 10K (51%)",
+      "total_profit": -89680,
+      "tournaments": 1000,
+      "updated_at": "2026-03-26T22:08:53"
+    },
+    "mc10k_75": {
+      "hands": 1600000,
+      "matches": 8000,
+      "strategy_name": "Monte Carlo 10K (75%)",
+      "total_profit": -976077,
+      "tournaments": 1000,
+      "updated_at": "2026-03-26T22:08:53"
+    },
+    "random": {
+      "hands": 1600000,
+      "matches": 8000,
+      "strategy_name": "Random",
+      "total_profit": -90465,
+      "tournaments": 1000,
+      "updated_at": "2026-03-26T22:08:53"
+    },
+    "tag": {
+      "hands": 1600000,
+      "matches": 8000,
+      "strategy_name": "Tight-Aggressive (TAG)",
+      "total_profit": -706142,
+      "tournaments": 1000,
+      "updated_at": "2026-03-26T22:08:53"
+    }
+  },
+  "version": 1
+}

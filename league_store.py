@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-import sqlite3
+import json
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Iterable
 
 import arena
 
-DB_FILE = "bot_league.db"
+STORE_FILE = "bot_league.json"
 
 
 @dataclass(frozen=True)
@@ -21,106 +22,72 @@ class LeagueRow:
     avg_profit_per_100: float
 
 
-def _conn() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    return conn
+def _read_payload() -> dict:
+    path = Path(STORE_FILE)
+    if not path.exists():
+        return {"version": 1, "strategies": {}}
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _write_payload(payload: dict) -> None:
+    Path(STORE_FILE).write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
 
 
 def init_store() -> None:
-    with _conn() as conn:
-        conn.execute(
-            """
-            CREATE TABLE IF NOT EXISTS strategy_stats (
-                strategy_key    TEXT PRIMARY KEY,
-                strategy_name   TEXT NOT NULL,
-                tournaments     INTEGER NOT NULL,
-                matches         INTEGER NOT NULL,
-                hands           INTEGER NOT NULL,
-                total_profit    INTEGER NOT NULL,
-                updated_at      TEXT NOT NULL
-            )
-            """
-        )
-        conn.commit()
+    payload = _read_payload()
+    payload.setdefault("version", 1)
+    payload.setdefault("strategies", {})
+    _write_payload(payload)
 
 
 def record_tournament(rows: Iterable[arena.TournamentRow], runs: int) -> None:
     init_store()
+    payload = _read_payload()
+    bucket = payload.setdefault("strategies", {})
     now = datetime.now().isoformat(timespec="seconds")
 
-    with _conn() as conn:
-        for row in rows:
-            existing = conn.execute(
-                "SELECT * FROM strategy_stats WHERE strategy_key = ?",
-                (row.strategy_key,),
-            ).fetchone()
-            if existing is None:
-                conn.execute(
-                    """
-                    INSERT INTO strategy_stats
-                           (strategy_key, strategy_name, tournaments, matches, hands, total_profit, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        row.strategy_key,
-                        row.strategy_name,
-                        int(runs),
-                        int(row.matches),
-                        int(row.hands),
-                        int(row.total_profit),
-                        now,
-                    ),
-                )
-                continue
+    for row in rows:
+        key = row.strategy_key
+        existing = bucket.get(key)
+        if existing is None:
+            bucket[key] = {
+                "strategy_name": row.strategy_name,
+                "tournaments": int(runs),
+                "matches": int(row.matches),
+                "hands": int(row.hands),
+                "total_profit": int(row.total_profit),
+                "updated_at": now,
+            }
+            continue
 
-            conn.execute(
-                """
-                UPDATE strategy_stats
-                   SET strategy_name = ?,
-                       tournaments = tournaments + ?,
-                       matches = matches + ?,
-                       hands = hands + ?,
-                       total_profit = total_profit + ?,
-                       updated_at = ?
-                 WHERE strategy_key = ?
-                """,
-                (
-                    row.strategy_name,
-                    int(runs),
-                    int(row.matches),
-                    int(row.hands),
-                    int(row.total_profit),
-                    now,
-                    row.strategy_key,
-                ),
-            )
-        conn.commit()
+        existing["strategy_name"] = row.strategy_name
+        existing["tournaments"] = int(existing.get("tournaments", 0)) + int(runs)
+        existing["matches"] = int(existing.get("matches", 0)) + int(row.matches)
+        existing["hands"] = int(existing.get("hands", 0)) + int(row.hands)
+        existing["total_profit"] = int(existing.get("total_profit", 0)) + int(row.total_profit)
+        existing["updated_at"] = now
+
+    _write_payload(payload)
 
 
 def load_leaderboard(strategy_keys: list[str] | None = None) -> list[LeagueRow]:
     init_store()
 
-    query = "SELECT * FROM strategy_stats"
-    params: tuple = ()
-    if strategy_keys:
-        placeholders = ",".join("?" for _ in strategy_keys)
-        query += f" WHERE strategy_key IN ({placeholders})"
-        params = tuple(strategy_keys)
-
-    with _conn() as conn:
-        rows = conn.execute(query, params).fetchall()
+    payload = _read_payload()
+    bucket = payload.get("strategies", {})
 
     out: list[LeagueRow] = []
-    for row in rows:
-        hands = int(row["hands"])
-        profit = int(row["total_profit"])
+    for key, row in bucket.items():
+        if strategy_keys and key not in strategy_keys:
+            continue
+        hands = int(row.get("hands", 0))
+        profit = int(row.get("total_profit", 0))
         out.append(
             LeagueRow(
-                strategy_key=str(row["strategy_key"]),
-                strategy_name=str(row["strategy_name"]),
-                tournaments=int(row["tournaments"]),
-                matches=int(row["matches"]),
+                strategy_key=str(key),
+                strategy_name=str(row.get("strategy_name", key)),
+                tournaments=int(row.get("tournaments", 0)),
+                matches=int(row.get("matches", 0)),
                 hands=hands,
                 total_profit=profit,
                 avg_profit_per_100=(profit / hands) * 100 if hands else 0.0,

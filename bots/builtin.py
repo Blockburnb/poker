@@ -51,6 +51,24 @@ class MonteCarlo10K51Bot(BotStrategy):
 
 
 @dataclass
+class MonteCarlo10K10Bot(BotStrategy):
+    min_win_chance: float = 0.10
+    info: StrategyInfo = StrategyInfo(
+        key="mc10k_10",
+        name="Monte Carlo 10K (10%)",
+        summary="Runs 10k preflop sims; folds only when equity is below 10%.",
+        tags=("monte-carlo", "passive", "threshold"),
+    )
+
+    def decide(self, ctx: DecisionContext) -> Decision:
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        return "play" if equity >= self.min_win_chance else "fold"
+
+    def config(self) -> dict:
+        return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+
+@dataclass
 class TightAggressiveBot(BotStrategy):
     threshold: float = 0.62
     bluff_probability: float = 0.04
