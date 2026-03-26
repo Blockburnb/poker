@@ -1,0 +1,9 @@
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│    🃏  PokerOracle                               │
+│    Texas Hold'em Monte Carlo Equity Simulator    │
+│                                                  │
+└──────────────────────────────────────────────────┘
+──────────────── Deterministic Producer Mode FAST (River only) ────────────────
+Workers=7 checkpoint_every=1000 export_every=300s
+Resume: phase=fill opp=1 hand_index=0 board_index=0

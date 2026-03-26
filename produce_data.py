@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from itertools import combinations
 from pathlib import Path
 from typing import Iterator
@@ -24,6 +25,7 @@ from typing import Iterator
 import db
 import simulator as sim
 import ui
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 BATCH_ITERATIONS = 1000
 MAX_OPPONENTS = 9
@@ -119,6 +121,32 @@ def _switch_to_refine(state: dict) -> None:
     state["board_index"] = 0
 
 
+def _import_snapshot_with_progress() -> int:
+    task_total = 1
+    inserted_rows = 0
+
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TextColumn("{task.completed:,}/{task.total:,}"),
+        TextColumn("inserted={task.fields[inserted]:,}"),
+        TimeElapsedColumn(),
+        console=ui.console,
+        transient=True,
+    ) as progress:
+        task_id = progress.add_task("Importing DB snapshot", total=task_total, inserted=0)
+
+        def _on_progress(processed: int, total: int, inserted: int) -> None:
+            nonlocal inserted_rows
+            inserted_rows = inserted
+            progress.update(task_id, total=max(1, total), completed=processed, inserted=inserted)
+
+        inserted_rows = db.import_snapshot(progress_callback=_on_progress, progress_every=2500)
+
+    return inserted_rows
+
+
 def _run_fill(state: dict) -> None:
     total_scenarios = _total_fill_scenarios()
 
@@ -182,8 +210,18 @@ def _run_refine(state: dict) -> None:
 
 
 def main() -> None:
+    ui.console.print("[dim]Startup 1/3: initializing SQLite schema...[/dim]")
     db.init_db()
-    db.import_snapshot()
+    ui.console.print(
+        f"[dim]Startup 2/3: importing snapshot '{db.DB_SNAPSHOT_FILE}' (can be slow on large files)...[/dim]"
+    )
+    import_started = time.perf_counter()
+    imported_rows = _import_snapshot_with_progress()
+    import_elapsed = time.perf_counter() - import_started
+    ui.console.print(
+        f"[dim]Snapshot import done: inserted={imported_rows:,} rows in {import_elapsed:.2f}s[/dim]"
+    )
+    ui.console.print("[dim]Startup 3/3: loading checkpoint...[/dim]")
     state = _load_checkpoint()
 
     ui.display_title()

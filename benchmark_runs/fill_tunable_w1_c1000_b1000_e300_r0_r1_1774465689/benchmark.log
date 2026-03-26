@@ -1,0 +1,12 @@
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│    🃏  PokerOracle                               │
+│    Texas Hold'em Monte Carlo Equity Simulator    │
+│                                                  │
+└──────────────────────────────────────────────────┘
+───────────────────── Deterministic Producer Mode TUNABLE ─────────────────────
+phase=both workers=1 batch_iterations=1000 checkpoint_every=1000 
+export_every=300s refine_batch=2
+db=poker_oracle.db snapshot=db_snapshot.json 
+checkpoint=producer_checkpoint_tunable_w1_c1000_b1000_e300_r0.json
+Resume: phase=fill opp=1 hand_index=0 board_index=0

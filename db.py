@@ -12,7 +12,7 @@ import sqlite3
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 DB_FILE = "poker_oracle.db"
 DB_SNAPSHOT_FILE = "db_snapshot.json"
@@ -202,11 +202,20 @@ def export_snapshot(snapshot_file: str = DB_SNAPSHOT_FILE) -> Path:
     return out
 
 
-def import_snapshot(snapshot_file: str = DB_SNAPSHOT_FILE) -> int:
+def import_snapshot(
+    snapshot_file: str = DB_SNAPSHOT_FILE,
+    progress_callback: Optional[Callable[[int, int, int], None]] = None,
+    progress_every: int = 5000,
+) -> int:
     """
     Import rows from a JSON snapshot into SQLite.
 
     Returns the number of inserted rows. Existing scenario keys are skipped.
+
+    Args:
+        snapshot_file: JSON snapshot path.
+        progress_callback: Optional callback(processed, total, inserted).
+        progress_every: Callback frequency in processed rows.
     """
     path = Path(snapshot_file)
     if not path.exists():
@@ -215,9 +224,15 @@ def import_snapshot(snapshot_file: str = DB_SNAPSHOT_FILE) -> int:
     payload = json.loads(path.read_text(encoding="utf-8"))
     rows = payload.get("simulations", [])
     inserted = 0
+    total_rows = len(rows)
+
+    def _maybe_report_progress(processed: int) -> None:
+        if progress_callback is None:
+            return
+        progress_callback(processed, total_rows, inserted)
 
     with _get_connection() as conn:
-        for row in rows:
+        for processed, row in enumerate(rows, start=1):
             existing = conn.execute(
                 """
                 SELECT id FROM simulations
@@ -256,6 +271,13 @@ def import_snapshot(snapshot_file: str = DB_SNAPSHOT_FILE) -> int:
             )
             inserted += 1
 
+            if processed == 1 or processed == total_rows or processed % max(1, progress_every) == 0:
+                _maybe_report_progress(processed)
+
         conn.commit()
+
+    # Ensure UI reaches 100% even when nothing is inserted.
+    if total_rows > 0:
+        _maybe_report_progress(total_rows)
 
     return inserted

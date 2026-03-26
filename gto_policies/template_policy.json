@@ -1,0 +1,11 @@
+{
+  "name": "Template Policy",
+  "source": "PioSolver|GTO+|Simple Postflop export",
+  "default_play_probability": 0.5,
+  "hands": {
+    "Ah As": 1.0,
+    "Kh Kd": 1.0,
+    "Ah Kd": 0.8,
+    "7c 2d": 0.05
+  }
+}

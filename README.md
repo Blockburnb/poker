@@ -48,6 +48,9 @@ python consult_oracle.py
 
 # Automatic River data producer (continuous 1000-iteration batches)
 python produce_data.py
+
+# Multi-strategy arena (bot vs bot, round-robin, human vs bot)
+python bot_arena.py
 ```
 
 The tool will guide you step-by-step:
@@ -78,6 +81,13 @@ The tool will guide you step-by-step:
 ```
 poker/
 ├── main.py          ← Entry point & interactive flow
+├── bot_arena.py     ← TUI arena for strategy comparison
+├── arena.py         ← Heads-up engine + round-robin evaluation
+├── bots/
+│   ├── base.py      ← Strategy interface (decision context)
+│   ├── registry.py  ← Strategy registry / factories
+│   ├── builtin.py   ← Built-in bot strategies
+│   └── human.py     ← Human strategy adapter for TUI play
 ├── simulator.py     ← Monte Carlo engine (treys)
 ├── db.py            ← SQLite persistence layer
 ├── ui.py            ← Rich TUI components
@@ -85,6 +95,48 @@ poker/
 ├── README.md
 └── .gitignore
 ```
+
+---
+
+## Bot Arena
+
+`bot_arena.py` gives a single place to view all registered strategies and compare
+them quickly in a reproducible way.
+
+Modes:
+
+1. `list` – show all available strategies with summary and tags.
+2. `bot` – run one heads-up match between two bots.
+3. `rr` – run round-robin over a set of strategies and show ranking by profit.
+4. `human` – play Human vs selected bot in the same TUI.
+
+Ranking metric in round-robin:
+
+- `Profit/100`: average chip profit per 100 hands (higher is better).
+
+Default variance-control behavior:
+
+- Round-robin runs with **100 runs** by default.
+- Results are accumulated in `bot_league.db`.
+- Re-launching and running another tournament **adds** to existing strategy stats.
+
+Built-in strategy profiles:
+
+- `mc10k_75`: Monte Carlo 10,000 simulations at hand draw, plays check/call only when equity >= 75%, else fold.
+- `tag`: Tight-Aggressive.
+- `lag`: Loose-Aggressive.
+- `calling_station`: Calling Station.
+- `maniac`: Maniac.
+- `random`: Random decisions.
+
+GTO policy comparison (PioSolver / GTO+ / Simple Postflop exports):
+
+- Drop exported JSON policy files into `gto_policies/`.
+- Each file is auto-registered as `gto_<filename>` strategy in the arena.
+- Use `gto_policies/template_policy.json` as a format reference.
+
+This structure is designed so you can add new bots by implementing the strategy
+interface and registering them in `bots/registry.py`.
 
 ---
 
