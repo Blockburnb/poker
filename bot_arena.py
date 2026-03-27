@@ -75,13 +75,17 @@ class _AdaptiveEtaEstimator:
         else:
             rate_blend = 0.0
 
-        # Avoid noisy ETA at startup until we have enough signal.
+        # Avoid noisy estimation at startup until we have enough signal.
         if self.updates_with_progress < 3 or rate_blend <= 1e-9:
-            eta = None
+            total_estimated = None
         else:
             eta = remaining / rate_blend
+            total_estimated = elapsed + eta
 
-        return f"{_format_hms(elapsed)}/{_format_hms(eta)}"
+        if completed >= total:
+            total_estimated = elapsed
+
+        return f"{_format_hms(elapsed)}/{_format_hms(total_estimated)}"
 
 
 def _ask_positive_int(label: str, default: int, min_value: int = 1) -> int:

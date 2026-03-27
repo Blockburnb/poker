@@ -69,6 +69,96 @@ class MonteCarlo10K10Bot(BotStrategy):
 
 
 @dataclass
+class MonteCarlo10K1Bot(BotStrategy):
+    min_win_chance: float = 0.01
+    info: StrategyInfo = StrategyInfo(
+        key="mc10k_1",
+        name="Monte Carlo 10K (1%)",
+        summary="Runs 10k preflop sims; folds only when equity is below 1%.",
+        tags=("monte-carlo", "passive", "threshold"),
+    )
+
+    def decide(self, ctx: DecisionContext) -> Decision:
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        return "play" if equity >= self.min_win_chance else "fold"
+
+    def config(self) -> dict:
+        return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+
+@dataclass
+class MonteCarlo10K5Bot(BotStrategy):
+    min_win_chance: float = 0.05
+    info: StrategyInfo = StrategyInfo(
+        key="mc10k_5",
+        name="Monte Carlo 10K (5%)",
+        summary="Runs 10k preflop sims; folds only when equity is below 5%.",
+        tags=("monte-carlo", "passive", "threshold"),
+    )
+
+    def decide(self, ctx: DecisionContext) -> Decision:
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        return "play" if equity >= self.min_win_chance else "fold"
+
+    def config(self) -> dict:
+        return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+
+@dataclass
+class MonteCarlo10K15Bot(BotStrategy):
+    min_win_chance: float = 0.15
+    info: StrategyInfo = StrategyInfo(
+        key="mc10k_15",
+        name="Monte Carlo 10K (15%)",
+        summary="Runs 10k preflop sims; folds only when equity is below 15%.",
+        tags=("monte-carlo", "passive", "threshold"),
+    )
+
+    def decide(self, ctx: DecisionContext) -> Decision:
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        return "play" if equity >= self.min_win_chance else "fold"
+
+    def config(self) -> dict:
+        return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+
+@dataclass
+class MonteCarlo10K20Bot(BotStrategy):
+    min_win_chance: float = 0.20
+    info: StrategyInfo = StrategyInfo(
+        key="mc10k_20",
+        name="Monte Carlo 10K (20%)",
+        summary="Runs 10k preflop sims; folds only when equity is below 20%.",
+        tags=("monte-carlo", "passive", "threshold"),
+    )
+
+    def decide(self, ctx: DecisionContext) -> Decision:
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        return "play" if equity >= self.min_win_chance else "fold"
+
+    def config(self) -> dict:
+        return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+
+@dataclass
+class MonteCarlo10K25Bot(BotStrategy):
+    min_win_chance: float = 0.25
+    info: StrategyInfo = StrategyInfo(
+        key="mc10k_25",
+        name="Monte Carlo 10K (25%)",
+        summary="Runs 10k preflop sims; folds only when equity is below 25%.",
+        tags=("monte-carlo", "passive", "threshold"),
+    )
+
+    def decide(self, ctx: DecisionContext) -> Decision:
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        return "play" if equity >= self.min_win_chance else "fold"
+
+    def config(self) -> dict:
+        return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+
+@dataclass
 class TightAggressiveBot(BotStrategy):
     threshold: float = 0.62
     bluff_probability: float = 0.04
@@ -178,3 +268,29 @@ class RandomBot(BotStrategy):
 
     def config(self) -> dict:
         return {"play_probability": self.play_probability}
+
+
+@dataclass
+class AlwaysCallBot(BotStrategy):
+    info: StrategyInfo = StrategyInfo(
+        key="always_call",
+        name="Always Check/Call",
+        summary="Very naive profile: always checks/calls and never folds.",
+        tags=("style", "baseline", "naive"),
+    )
+
+    def decide(self, ctx: DecisionContext) -> Decision:
+        return "play"
+
+
+@dataclass
+class AlwaysRaiseBot(BotStrategy):
+    info: StrategyInfo = StrategyInfo(
+        key="always_raise",
+        name="Always Raise",
+        summary="Very naive profile: raises every decision and never folds.",
+        tags=("style", "baseline", "naive", "aggressive"),
+    )
+
+    def decide(self, ctx: DecisionContext) -> Decision:
+        return "raise"

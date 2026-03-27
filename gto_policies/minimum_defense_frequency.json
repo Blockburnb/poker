@@ -1,0 +1,18 @@
+{
+  "name": "Minimum Defense Frequency",
+  "source": "User-defined GTO profile",
+  "description": "Profile inspired by MDF principle: defend enough to avoid being exploited by frequent bluffs.",
+  "default_play_probability": 0.6,
+  "hands": {
+    "Ah As": 1.0,
+    "Kh Kd": 0.98,
+    "Qh Qd": 0.92,
+    "Ah Kd": 0.85,
+    "Ah Qd": 0.75,
+    "Kc Qc": 0.68,
+    "Jh Th": 0.62,
+    "9h 8h": 0.58,
+    "8c 7d": 0.52,
+    "7c 2d": 0.22
+  }
+}

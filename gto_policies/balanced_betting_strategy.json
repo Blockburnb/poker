@@ -1,0 +1,18 @@
+{
+  "name": "Balanced Betting Strategy",
+  "source": "User-defined GTO profile",
+  "description": "Mix of value and bluffs with controlled proportions so ranges are harder to exploit.",
+  "default_play_probability": 0.52,
+  "hands": {
+    "Ah As": 1.0,
+    "Kh Kd": 1.0,
+    "Qh Qd": 0.95,
+    "Ah Kd": 0.88,
+    "Ah Qd": 0.78,
+    "Jh Th": 0.63,
+    "9h 8h": 0.58,
+    "7h 6h": 0.53,
+    "5h 4h": 0.48,
+    "7c 2d": 0.12
+  }
+}

@@ -9,7 +9,11 @@ from typing import Callable, Iterable
 from treys import Evaluator
 
 import simulator as sim
-from bots.base import BotStrategy, DecisionContext
+from bots.base import BotStrategy, Decision, DecisionContext
+
+
+def _is_continue_action(action: Decision) -> bool:
+    return action in {"play", "raise"}
 
 
 @dataclass(frozen=True)
@@ -141,9 +145,9 @@ def run_heads_up_match(
         hero_action = hero.decide(hero_ctx)
         villain_action = villain.decide(villain_ctx)
 
-        if hero_action == "play":
+        if _is_continue_action(hero_action):
             hero_plays += 1
-        if villain_action == "play":
+        if _is_continue_action(villain_action):
             villain_plays += 1
 
         # Antes are 1 chip each, then each strategy decides fold/play.
