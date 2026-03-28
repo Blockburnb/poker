@@ -1,172 +1,172 @@
 {
   "strategies": {
     "always_call": {
-      "hands": 35100000,
-      "matches": 123000,
+      "hands": 55100000,
+      "matches": 223000,
       "strategy_name": "Always Check/Call",
-      "total_profit": 8294915,
-      "tournaments": 12000,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": 14131326,
+      "tournaments": 17000,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "always_raise": {
-      "hands": 35100000,
-      "matches": 123000,
+      "hands": 55100000,
+      "matches": 223000,
       "strategy_name": "Always Raise",
-      "total_profit": 8303218,
-      "tournaments": 12000,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": 14150569,
+      "tournaments": 17000,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "calling_station": {
-      "hands": 36700000,
-      "matches": 131000,
+      "hands": 56700000,
+      "matches": 231000,
       "strategy_name": "Calling Station",
-      "total_profit": 8577173,
-      "tournaments": 13000,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": 14180252,
+      "tournaments": 18000,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "gto_balanced_betting_strategy": {
-      "hands": 30600000,
-      "matches": 100500,
+      "hands": 50600000,
+      "matches": 200500,
       "strategy_name": "GTO: Balanced Betting Strategy",
-      "total_profit": -9005225,
-      "tournaments": 10500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": -13036975,
+      "tournaments": 15500,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "gto_minimum_defense_frequency": {
-      "hands": 9600000,
-      "matches": 48000,
+      "hands": 29600000,
+      "matches": 148000,
       "strategy_name": "GTO: Minimum Defense Frequency",
-      "total_profit": -1034799,
-      "tournaments": 3000,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": -3424516,
+      "tournaments": 8000,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "gto_mixed_strategy": {
-      "hands": 30600000,
-      "matches": 100500,
+      "hands": 50600000,
+      "matches": 200500,
       "strategy_name": "GTO: Mixed Strategy",
-      "total_profit": -9699342,
-      "tournaments": 10500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": -14147964,
+      "tournaments": 15500,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "gto_optimal_bluffing_frequency": {
-      "hands": 9600000,
-      "matches": 48000,
+      "hands": 29600000,
+      "matches": 148000,
       "strategy_name": "GTO: Optimal Bluffing Frequency",
-      "total_profit": -2342334,
-      "tournaments": 3000,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": -7411903,
+      "tournaments": 8000,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "gto_range_balancing": {
-      "hands": 9600000,
-      "matches": 48000,
+      "hands": 29600000,
+      "matches": 148000,
       "strategy_name": "GTO: Range Balancing",
-      "total_profit": -2038623,
-      "tournaments": 3000,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": -6498152,
+      "tournaments": 8000,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "gto_template_policy": {
-      "hands": 15700000,
-      "matches": 78500,
+      "hands": 35700000,
+      "matches": 178500,
       "strategy_name": "GTO: Template Policy",
-      "total_profit": -3524477,
-      "tournaments": 5500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": -7985117,
+      "tournaments": 10500,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "lag": {
-      "hands": 15700000,
-      "matches": 78500,
+      "hands": 35700000,
+      "matches": 178500,
       "strategy_name": "Loose-Aggressive (LAG)",
-      "total_profit": -372932,
-      "tournaments": 5500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": -858273,
+      "tournaments": 10500,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "maniac": {
-      "hands": 15700000,
-      "matches": 78500,
+      "hands": 35700000,
+      "matches": 178500,
       "strategy_name": "Maniac",
-      "total_profit": 3686133,
-      "tournaments": 5500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": 8263591,
+      "tournaments": 10500,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "mc10k_1": {
-      "hands": 35100000,
-      "matches": 123000,
+      "hands": 55100000,
+      "matches": 223000,
       "strategy_name": "Monte Carlo 10K (1%)",
-      "total_profit": 8277093,
-      "tournaments": 12000,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": 14093198,
+      "tournaments": 17000,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "mc10k_10": {
-      "hands": 36700000,
-      "matches": 131000,
+      "hands": 56700000,
+      "matches": 231000,
       "strategy_name": "Monte Carlo 10K (10%)",
-      "total_profit": 8938087,
-      "tournaments": 13000,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": 14741150,
+      "tournaments": 18000,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "mc10k_15": {
-      "hands": 8500000,
-      "matches": 42500,
+      "hands": 28500000,
+      "matches": 142500,
       "strategy_name": "Monte Carlo 10K (15%)",
-      "total_profit": 2183806,
-      "tournaments": 2500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": 7983855,
+      "tournaments": 7500,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "mc10k_20": {
-      "hands": 8500000,
-      "matches": 42500,
+      "hands": 28500000,
+      "matches": 142500,
       "strategy_name": "Monte Carlo 10K (20%)",
-      "total_profit": 2176169,
-      "tournaments": 2500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": 7975076,
+      "tournaments": 7500,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "mc10k_25": {
-      "hands": 8500000,
-      "matches": 42500,
+      "hands": 28500000,
+      "matches": 142500,
       "strategy_name": "Monte Carlo 10K (25%)",
-      "total_profit": 2170468,
-      "tournaments": 2500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": 7962531,
+      "tournaments": 7500,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "mc10k_5": {
-      "hands": 8500000,
-      "matches": 42500,
+      "hands": 28500000,
+      "matches": 142500,
       "strategy_name": "Monte Carlo 10K (5%)",
-      "total_profit": 2167941,
-      "tournaments": 2500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": 7956104,
+      "tournaments": 7500,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "mc10k_51": {
-      "hands": 10100000,
-      "matches": 50500,
+      "hands": 30100000,
+      "matches": 150500,
       "strategy_name": "Monte Carlo 10K (51%)",
-      "total_profit": -1658500,
-      "tournaments": 3500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": -4737413,
+      "tournaments": 8500,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "mc10k_75": {
-      "hands": 10100000,
-      "matches": 50500,
+      "hands": 30100000,
+      "matches": 150500,
       "strategy_name": "Monte Carlo 10K (75%)",
-      "total_profit": -7216494,
-      "tournaments": 3500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": -21231889,
+      "tournaments": 8500,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "random": {
-      "hands": 36700000,
-      "matches": 131000,
+      "hands": 56700000,
+      "matches": 231000,
       "strategy_name": "Random",
-      "total_profit": -9247726,
-      "tournaments": 13000,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": -12714828,
+      "tournaments": 18000,
+      "updated_at": "2026-03-28T23:28:20"
     },
     "tag": {
-      "hands": 15700000,
-      "matches": 78500,
+      "hands": 35700000,
+      "matches": 178500,
       "strategy_name": "Tight-Aggressive (TAG)",
-      "total_profit": -8634551,
-      "tournaments": 5500,
-      "updated_at": "2026-03-28T10:58:50"
+      "total_profit": -19390622,
+      "tournaments": 10500,
+      "updated_at": "2026-03-28T23:28:20"
     }
   },
   "version": 1
