@@ -20,6 +20,7 @@ class DecisionContext:
     villain_stack: int
     hand_index: int
     total_hands: int
+    opponents: int = 1
 
 
 @dataclass(frozen=True)
@@ -45,3 +46,7 @@ class BotStrategy(ABC):
     def config(self) -> Dict[str, Any]:
         """Optional strategy config displayed in the TUI table."""
         return {}
+
+    def needs_equity(self) -> bool:
+        """Whether this strategy needs estimated_equity in DecisionContext."""
+        return True

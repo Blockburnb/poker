@@ -9,8 +9,8 @@ from bots.base import BotStrategy, Decision, DecisionContext, StrategyInfo
 
 
 @lru_cache(maxsize=50000)
-def _hand_equity_10k_cached(sorted_hand: tuple[int, int]) -> float:
-    result = sim.simulate(list(sorted_hand), [], 1, 10_000)
+def _hand_equity_10k_cached(sorted_hand: tuple[int, int], opponents: int) -> float:
+    result = sim.simulate(list(sorted_hand), [], max(1, opponents), 10_000)
     return float(result["equity"])
 
 
@@ -25,11 +25,14 @@ class MonteCarlo10KBot(BotStrategy):
     )
 
     def decide(self, ctx: DecisionContext) -> Decision:
-        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)), ctx.opponents)
         return "play" if equity >= self.min_win_chance else "fold"
 
     def config(self) -> dict:
         return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+    def needs_equity(self) -> bool:
+        return False
 
 
 @dataclass
@@ -43,11 +46,14 @@ class MonteCarlo10K51Bot(BotStrategy):
     )
 
     def decide(self, ctx: DecisionContext) -> Decision:
-        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)), ctx.opponents)
         return "play" if equity >= self.min_win_chance else "fold"
 
     def config(self) -> dict:
         return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+    def needs_equity(self) -> bool:
+        return False
 
 
 @dataclass
@@ -61,11 +67,14 @@ class MonteCarlo10K10Bot(BotStrategy):
     )
 
     def decide(self, ctx: DecisionContext) -> Decision:
-        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)), ctx.opponents)
         return "play" if equity >= self.min_win_chance else "fold"
 
     def config(self) -> dict:
         return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+    def needs_equity(self) -> bool:
+        return False
 
 
 @dataclass
@@ -79,11 +88,14 @@ class MonteCarlo10K1Bot(BotStrategy):
     )
 
     def decide(self, ctx: DecisionContext) -> Decision:
-        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)), ctx.opponents)
         return "play" if equity >= self.min_win_chance else "fold"
 
     def config(self) -> dict:
         return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+    def needs_equity(self) -> bool:
+        return False
 
 
 @dataclass
@@ -97,11 +109,14 @@ class MonteCarlo10K5Bot(BotStrategy):
     )
 
     def decide(self, ctx: DecisionContext) -> Decision:
-        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)), ctx.opponents)
         return "play" if equity >= self.min_win_chance else "fold"
 
     def config(self) -> dict:
         return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+    def needs_equity(self) -> bool:
+        return False
 
 
 @dataclass
@@ -115,11 +130,14 @@ class MonteCarlo10K15Bot(BotStrategy):
     )
 
     def decide(self, ctx: DecisionContext) -> Decision:
-        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)), ctx.opponents)
         return "play" if equity >= self.min_win_chance else "fold"
 
     def config(self) -> dict:
         return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+    def needs_equity(self) -> bool:
+        return False
 
 
 @dataclass
@@ -133,11 +151,14 @@ class MonteCarlo10K20Bot(BotStrategy):
     )
 
     def decide(self, ctx: DecisionContext) -> Decision:
-        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)), ctx.opponents)
         return "play" if equity >= self.min_win_chance else "fold"
 
     def config(self) -> dict:
         return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+    def needs_equity(self) -> bool:
+        return False
 
 
 @dataclass
@@ -151,11 +172,14 @@ class MonteCarlo10K25Bot(BotStrategy):
     )
 
     def decide(self, ctx: DecisionContext) -> Decision:
-        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)))
+        equity = _hand_equity_10k_cached(tuple(sorted(ctx.hand)), ctx.opponents)
         return "play" if equity >= self.min_win_chance else "fold"
 
     def config(self) -> dict:
         return {"simulations": 10000, "min_win_chance": self.min_win_chance}
+
+    def needs_equity(self) -> bool:
+        return False
 
 
 @dataclass
@@ -247,6 +271,9 @@ class ManiacBot(BotStrategy):
     def config(self) -> dict:
         return {"play_probability": self.play_probability}
 
+    def needs_equity(self) -> bool:
+        return False
+
 
 @dataclass
 class RandomBot(BotStrategy):
@@ -269,6 +296,9 @@ class RandomBot(BotStrategy):
     def config(self) -> dict:
         return {"play_probability": self.play_probability}
 
+    def needs_equity(self) -> bool:
+        return False
+
 
 @dataclass
 class AlwaysCallBot(BotStrategy):
@@ -282,6 +312,9 @@ class AlwaysCallBot(BotStrategy):
     def decide(self, ctx: DecisionContext) -> Decision:
         return "play"
 
+    def needs_equity(self) -> bool:
+        return False
+
 
 @dataclass
 class AlwaysRaiseBot(BotStrategy):
@@ -294,3 +327,6 @@ class AlwaysRaiseBot(BotStrategy):
 
     def decide(self, ctx: DecisionContext) -> Decision:
         return "raise"
+
+    def needs_equity(self) -> bool:
+        return False

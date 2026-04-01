@@ -9,6 +9,7 @@ from typing import Iterable
 import arena
 
 STORE_FILE = "bot_league.json"
+FIELD_STORE_FILE = "bot_league_field.json"
 
 
 @dataclass(frozen=True)
@@ -22,15 +23,35 @@ class LeagueRow:
     avg_profit_per_100: float
 
 
-def _read_payload() -> dict:
-    path = Path(STORE_FILE)
+@dataclass(frozen=True)
+class FieldLeagueRow:
+    strategy_key: str
+    strategy_name: str
+    simulations: int
+    tables: int
+    seat_appearances: int
+    hands: int
+    total_profit: int
+    avg_profit_per_100: float
+
+
+def _read_payload_from(path_str: str) -> dict:
+    path = Path(path_str)
     if not path.exists():
         return {"version": 1, "strategies": {}}
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _write_payload_to(path_str: str, payload: dict) -> None:
+    Path(path_str).write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+
+
+def _read_payload() -> dict:
+    return _read_payload_from(STORE_FILE)
+
+
 def _write_payload(payload: dict) -> None:
-    Path(STORE_FILE).write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    _write_payload_to(STORE_FILE, payload)
 
 
 def init_store() -> None:
@@ -38,6 +59,13 @@ def init_store() -> None:
     payload.setdefault("version", 1)
     payload.setdefault("strategies", {})
     _write_payload(payload)
+
+
+def init_field_store() -> None:
+    payload = _read_payload_from(FIELD_STORE_FILE)
+    payload.setdefault("version", 1)
+    payload.setdefault("strategies", {})
+    _write_payload_to(FIELD_STORE_FILE, payload)
 
 
 def record_tournament(rows: Iterable[arena.TournamentRow], runs: int) -> None:
@@ -88,6 +116,67 @@ def load_leaderboard(strategy_keys: list[str] | None = None) -> list[LeagueRow]:
                 strategy_name=str(row.get("strategy_name", key)),
                 tournaments=int(row.get("tournaments", 0)),
                 matches=int(row.get("matches", 0)),
+                hands=hands,
+                total_profit=profit,
+                avg_profit_per_100=(profit / hands) * 100 if hands else 0.0,
+            )
+        )
+
+    out.sort(key=lambda x: x.avg_profit_per_100, reverse=True)
+    return out
+
+
+def record_field_tournament(rows: Iterable[arena.FieldComparisonRow], simulations: int) -> None:
+    init_field_store()
+    payload = _read_payload_from(FIELD_STORE_FILE)
+    bucket = payload.setdefault("strategies", {})
+    now = datetime.now().isoformat(timespec="seconds")
+
+    for row in rows:
+        key = row.strategy_key
+        existing = bucket.get(key)
+        if existing is None:
+            bucket[key] = {
+                "strategy_name": row.strategy_name,
+                "simulations": int(simulations),
+                "tables": int(row.tables_played),
+                "seat_appearances": int(row.seat_appearances),
+                "hands": int(row.hands),
+                "total_profit": int(row.total_profit),
+                "updated_at": now,
+            }
+            continue
+
+        existing["strategy_name"] = row.strategy_name
+        existing["simulations"] = int(existing.get("simulations", 0)) + int(simulations)
+        existing["tables"] = int(existing.get("tables", 0)) + int(row.tables_played)
+        existing["seat_appearances"] = int(existing.get("seat_appearances", 0)) + int(row.seat_appearances)
+        existing["hands"] = int(existing.get("hands", 0)) + int(row.hands)
+        existing["total_profit"] = int(existing.get("total_profit", 0)) + int(row.total_profit)
+        existing["updated_at"] = now
+
+    _write_payload_to(FIELD_STORE_FILE, payload)
+
+
+def load_field_leaderboard(strategy_keys: list[str] | None = None) -> list[FieldLeagueRow]:
+    init_field_store()
+
+    payload = _read_payload_from(FIELD_STORE_FILE)
+    bucket = payload.get("strategies", {})
+
+    out: list[FieldLeagueRow] = []
+    for key, row in bucket.items():
+        if strategy_keys and key not in strategy_keys:
+            continue
+        hands = int(row.get("hands", 0))
+        profit = int(row.get("total_profit", 0))
+        out.append(
+            FieldLeagueRow(
+                strategy_key=str(key),
+                strategy_name=str(row.get("strategy_name", key)),
+                simulations=int(row.get("simulations", 0)),
+                tables=int(row.get("tables", 0)),
+                seat_appearances=int(row.get("seat_appearances", 0)),
                 hands=hands,
                 total_profit=profit,
                 avg_profit_per_100=(profit / hands) * 100 if hands else 0.0,

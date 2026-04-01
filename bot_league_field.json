@@ -1,0 +1,194 @@
+{
+  "strategies": {
+    "always_call": {
+      "hands": 18940680,
+      "seat_appearances": 157839,
+      "simulations": 550000,
+      "strategy_name": "Always Check/Call",
+      "tables": 136848,
+      "total_profit": 5739855,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "always_raise": {
+      "hands": 18739080,
+      "seat_appearances": 156159,
+      "simulations": 550000,
+      "strategy_name": "Always Raise",
+      "tables": 135525,
+      "total_profit": 8034892,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "calling_station": {
+      "hands": 18780600,
+      "seat_appearances": 156505,
+      "simulations": 550000,
+      "strategy_name": "Calling Station",
+      "tables": 135835,
+      "total_profit": 1828448,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "gto_balanced_betting_strategy": {
+      "hands": 18893160,
+      "seat_appearances": 157443,
+      "simulations": 550000,
+      "strategy_name": "GTO: Balanced Betting Strategy",
+      "tables": 136579,
+      "total_profit": -2597620,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "gto_minimum_defense_frequency": {
+      "hands": 18857280,
+      "seat_appearances": 157144,
+      "simulations": 550000,
+      "strategy_name": "GTO: Minimum Defense Frequency",
+      "tables": 136241,
+      "total_profit": -1378427,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "gto_mixed_strategy": {
+      "hands": 18875640,
+      "seat_appearances": 157297,
+      "simulations": 550000,
+      "strategy_name": "GTO: Mixed Strategy",
+      "tables": 136389,
+      "total_profit": -2908329,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "gto_optimal_bluffing_frequency": {
+      "hands": 18837720,
+      "seat_appearances": 156981,
+      "simulations": 550000,
+      "strategy_name": "GTO: Optimal Bluffing Frequency",
+      "tables": 136071,
+      "total_profit": -3317716,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "gto_range_balancing": {
+      "hands": 18894120,
+      "seat_appearances": 157451,
+      "simulations": 550000,
+      "strategy_name": "GTO: Range Balancing",
+      "tables": 136701,
+      "total_profit": -2913825,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "gto_template_policy": {
+      "hands": 18766800,
+      "seat_appearances": 156390,
+      "simulations": 550000,
+      "strategy_name": "GTO: Template Policy",
+      "tables": 135686,
+      "total_profit": -2901960,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "lag": {
+      "hands": 18959760,
+      "seat_appearances": 157998,
+      "simulations": 550000,
+      "strategy_name": "Loose-Aggressive (LAG)",
+      "tables": 137123,
+      "total_profit": -5683014,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "maniac": {
+      "hands": 18731400,
+      "seat_appearances": 156095,
+      "simulations": 550000,
+      "strategy_name": "Maniac",
+      "tables": 135440,
+      "total_profit": 4499551,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "mc10k_1": {
+      "hands": 18810840,
+      "seat_appearances": 156757,
+      "simulations": 550000,
+      "strategy_name": "Monte Carlo 10K (1%)",
+      "tables": 136119,
+      "total_profit": 5739691,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "mc10k_10": {
+      "hands": 18912240,
+      "seat_appearances": 157602,
+      "simulations": 550000,
+      "strategy_name": "Monte Carlo 10K (10%)",
+      "tables": 136497,
+      "total_profit": 6908735,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "mc10k_15": {
+      "hands": 18721080,
+      "seat_appearances": 156009,
+      "simulations": 550000,
+      "strategy_name": "Monte Carlo 10K (15%)",
+      "tables": 135566,
+      "total_profit": 6136894,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "mc10k_20": {
+      "hands": 18886800,
+      "seat_appearances": 157390,
+      "simulations": 550000,
+      "strategy_name": "Monte Carlo 10K (20%)",
+      "tables": 136420,
+      "total_profit": 3302019,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "mc10k_25": {
+      "hands": 18844560,
+      "seat_appearances": 157038,
+      "simulations": 550000,
+      "strategy_name": "Monte Carlo 10K (25%)",
+      "tables": 136325,
+      "total_profit": 310006,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "mc10k_5": {
+      "hands": 18783120,
+      "seat_appearances": 156526,
+      "simulations": 550000,
+      "strategy_name": "Monte Carlo 10K (5%)",
+      "tables": 135657,
+      "total_profit": 5651794,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "mc10k_51": {
+      "hands": 18917520,
+      "seat_appearances": 157646,
+      "simulations": 550000,
+      "strategy_name": "Monte Carlo 10K (51%)",
+      "tables": 136753,
+      "total_profit": -7342228,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "mc10k_75": {
+      "hands": 18859920,
+      "seat_appearances": 157166,
+      "simulations": 550000,
+      "strategy_name": "Monte Carlo 10K (75%)",
+      "tables": 136234,
+      "total_profit": -8845965,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "random": {
+      "hands": 18831960,
+      "seat_appearances": 156933,
+      "simulations": 550000,
+      "strategy_name": "Random",
+      "tables": 136032,
+      "total_profit": -2184237,
+      "updated_at": "2026-04-01T21:08:07"
+    },
+    "tag": {
+      "hands": 18882600,
+      "seat_appearances": 157355,
+      "simulations": 550000,
+      "strategy_name": "Tight-Aggressive (TAG)",
+      "tables": 136526,
+      "total_profit": -8078564,
+      "updated_at": "2026-04-01T21:08:07"
+    }
+  },
+  "version": 1
+}

@@ -33,6 +33,9 @@ class ExternalPolicyBot(BotStrategy):
             "mapped_hands": len(self.hand_play_probability),
         }
 
+    def needs_equity(self) -> bool:
+        return False
+
 
 def load_external_gto_policies(policy_dir: str = "gto_policies") -> list[tuple[str, StrategyInfo, dict[str, float], float]]:
     directory = Path(policy_dir)
