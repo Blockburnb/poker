@@ -1,10 +1,17 @@
 from __future__ import annotations
 
 import math
+import os
+import subprocess
 import sys
 import threading
 import time
 from dataclasses import dataclass
+from datetime import datetime
+from json import dumps
+from urllib.error import HTTPError
+from urllib.error import URLError
+from urllib.request import Request, urlopen
 
 from rich.prompt import Confirm, IntPrompt, Prompt
 from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
@@ -14,6 +21,13 @@ import arena
 import league_store
 import ui
 from bots.registry import create_strategy, list_strategies, strategy_keys
+
+
+DEFAULT_DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1489881491549720617/K731VloqTmUd_uxiS8g2ZXdhbVifNGWI81lc0sy_R8yWpddX92er3nh4A1s5_cDn5CCg"
+_DISCORD_MESSAGE_LIMIT = 3800
+_DISCORD_TIMEOUT_SECONDS = 10
+_DISCORD_MAX_ATTEMPTS = 3
+_DISCORD_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) PokerArenaBot/1.0"
 
 
 def _format_hms(seconds: float | None) -> str:
@@ -117,6 +131,182 @@ class _GracefulStopSignal:
 
     def is_set(self) -> bool:
         return self._event.is_set()
+
+
+def _discord_webhook_url() -> str | None:
+    return os.environ.get("DISCORD_WEBHOOK_URL") or DEFAULT_DISCORD_WEBHOOK_URL
+
+
+def _trim_discord_text(text: str, limit: int = _DISCORD_MESSAGE_LIMIT) -> str:
+    if len(text) <= limit:
+        return text
+    return text[: max(0, limit - 3)] + "..."
+
+
+def _format_match_lines(result: arena.MatchResult) -> list[str]:
+    return [
+        f"Session: {result.hero_name} vs {result.villain_name}",
+        f"Hands: {result.hands:,}",
+        f"{result.hero_name} profit: {result.hero_profit:+,}",
+        f"{result.villain_name} profit: {result.villain_profit:+,}",
+        f"Showdowns: {result.showdowns:,}",
+        f"Ties: {result.ties:,}",
+        f"{result.hero_name} play frequency: {(result.hero_plays / result.hands) * 100:.1f}%",
+        f"{result.villain_name} play frequency: {(result.villain_plays / result.hands) * 100:.1f}%",
+    ]
+
+
+def _format_tournament_lines(rows: list[arena.TournamentRow], hands_per_match: int, title: str) -> list[str]:
+    lines = [f"{title} (hands/match: {hands_per_match})"]
+    for idx, row in enumerate(rows, start=1):
+        lines.append(
+            f"{idx}. {row.strategy_key} | {row.strategy_name} | matches {row.matches} | "
+            f"hands {row.hands:,} | profit {row.total_profit:+,} | /100 {row.avg_profit_per_100:+.3f}"
+        )
+    return lines
+
+
+def _format_field_lines(rows: list[arena.FieldComparisonRow], hands_per_table: int, title: str) -> list[str]:
+    lines = [f"{title} (hands/table: {hands_per_table})"]
+    for idx, row in enumerate(rows, start=1):
+        lines.append(
+            f"{idx}. {row.strategy_key} | {row.strategy_name} | tables {row.tables_played} | "
+            f"seats {row.seat_appearances} | size {row.avg_table_size:.2f} | showdowns {row.showdowns} | "
+            f"hands {row.hands:,} | profit {row.total_profit:+,} | /100 {row.avg_profit_per_100:+.3f}"
+        )
+    return lines
+
+
+def _format_field_leaderboard_lines(rows: list[league_store.FieldLeagueRow], title: str) -> list[str]:
+    lines = [title]
+    for idx, row in enumerate(rows, start=1):
+        lines.append(
+            f"{idx}. {row.strategy_key} | {row.strategy_name} | simulations {row.simulations} | "
+            f"tables {row.tables} | seats {row.seat_appearances} | hands {row.hands:,} | "
+            f"profit {row.total_profit:+,} | /100 {row.avg_profit_per_100:+.3f}"
+        )
+    return lines
+
+
+def _send_discord_summary(title: str, sections: list[tuple[str, list[str]]]) -> None:
+    webhook_url = _discord_webhook_url()
+    if not webhook_url:
+        return
+
+    body_lines: list[str] = []
+    for section_title, lines in sections:
+        body_lines.append(section_title)
+        body_lines.extend(lines)
+        body_lines.append("")
+
+    description = _trim_discord_text("\n".join(body_lines).strip())
+    payload = {
+        "content": "Poker arena simulation completed.",
+        "embeds": [
+            {
+                "title": title,
+                "description": description,
+                "color": 0x2D8CFF,
+            }
+        ],
+        "allowed_mentions": {"parse": []},
+    }
+
+    last_error: str | None = None
+
+    def _post(data: dict) -> tuple[bool, str | None]:
+        request = Request(
+            webhook_url,
+            data=dumps(data, separators=(",", ":")).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "User-Agent": _DISCORD_USER_AGENT,
+                "Connection": "close",
+            },
+            method="POST",
+        )
+        try:
+            with urlopen(request, timeout=_DISCORD_TIMEOUT_SECONDS) as response:
+                response.read()
+            return True, None
+        except HTTPError as exc:
+            details = ""
+            try:
+                details = exc.read().decode("utf-8", errors="replace")
+            except OSError:
+                details = ""
+            return False, f"HTTP {exc.code}: {details or exc.reason}"
+        except (OSError, URLError, TimeoutError) as exc:
+            return False, str(exc)
+
+    for _ in range(_DISCORD_MAX_ATTEMPTS):
+        ok, err = _post(payload)
+        if ok:
+            return
+        last_error = err
+
+    fallback_payload = {
+        "content": _trim_discord_text(f"{title}\n\n{description}", limit=1900),
+        "allowed_mentions": {"parse": []},
+    }
+    ok, err = _post(fallback_payload)
+    if ok:
+        ui.console.print("[dim]Discord embed failed; sent text-only fallback.[/dim]")
+        return
+
+    if err:
+        last_error = err
+    ui.console.print(f"[dim]Discord webhook delivery failed: {last_error}. Keeping local output only.[/dim]")
+
+
+def _run_git_command(args: list[str]) -> tuple[bool, str]:
+    proc = subprocess.run(args, capture_output=True, text=True, check=False)
+    output = (proc.stdout or "").strip()
+    err = (proc.stderr or "").strip()
+    merged = "\n".join(part for part in [output, err] if part).strip()
+    return proc.returncode == 0, merged
+
+
+def _post_run_commit_push_and_shutdown(session_label: str) -> None:
+    in_repo, _ = _run_git_command(["git", "rev-parse", "--is-inside-work-tree"])
+    if not in_repo:
+        ui.console.print("[yellow]Not in a git repository: skipping commit/push and continuing to shutdown.[/yellow]")
+    else:
+        _, add_out = _run_git_command(["git", "add", "-A"])
+        if add_out:
+            ui.console.print(f"[dim]{add_out}[/dim]")
+
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        commit_msg = f"chore(arena): save {session_label} session results ({timestamp})"
+        commit_ok, commit_out = _run_git_command(["git", "commit", "-m", commit_msg])
+        if not commit_ok:
+            lower = commit_out.lower()
+            if "nothing to commit" in lower or "no changes added to commit" in lower:
+                ui.console.print("[dim]No changes to commit.[/dim]")
+            else:
+                ui.console.print(
+                    f"[yellow]Commit failed (changes stay local): {commit_out or 'unknown error'}[/yellow]"
+                )
+
+        push_ok, push_out = _run_git_command(["git", "push"])
+        if not push_ok:
+            ui.console.print(
+                f"[yellow]Push failed (changes stay local): {push_out or 'unknown error'}[/yellow]"
+            )
+
+    ui.console.print("[green]Finite session completed. Scheduling shutdown in 30 seconds.[/green]")
+    subprocess.run(
+        [
+            "shutdown",
+            "/s",
+            "/t",
+            "30",
+            "/c",
+            "Poker arena finite session completed: Discord sent, git automation attempted.",
+        ],
+        check=False,
+    )
 
 
 def _merge_tournament_rows(rows: list[arena.TournamentRow], merged: dict[str, dict[str, int | str]]) -> None:
@@ -388,6 +578,10 @@ def _run_bot_vs_bot() -> None:
 
     hands = _ask_positive_int("Hands to play", default=300)
     equity_iterations = _ask_positive_int("Equity estimation iterations", default=1000)
+    shutdown_after = Confirm.ask(
+        "Shutdown PC after completion (Discord + git commit/push)?",
+        default=False,
+    )
 
     hero = create_strategy(hero_key)
     villain = create_strategy(villain_key)
@@ -401,6 +595,15 @@ def _run_bot_vs_bot() -> None:
         keep_hand_logs=False,
     )
     _render_match(result)
+    _send_discord_summary(
+        title="Bot vs Bot",
+        sections=[
+            ("Session result", _format_match_lines(result)),
+            ("Global result", ["No cumulative leaderboard for duel mode."]),
+        ],
+    )
+    if shutdown_after:
+        _post_run_commit_push_and_shutdown("bot-vs-bot")
 
 
 def _run_human_vs_bot() -> None:
@@ -423,6 +626,13 @@ def _run_human_vs_bot() -> None:
         keep_hand_logs=False,
     )
     _render_match(result)
+    _send_discord_summary(
+        title="Human vs Bot",
+        sections=[
+            ("Session result", _format_match_lines(result)),
+            ("Global result", ["No cumulative leaderboard for duel mode."]),
+        ],
+    )
 
 
 def _run_round_robin() -> None:
@@ -455,6 +665,10 @@ def _run_round_robin() -> None:
 
     entries = [(key, create_strategy(key)) for key in deduped]
     if exec_mode == "finite":
+        shutdown_after = Confirm.ask(
+            "Shutdown PC after completion (Discord + git commit/push)?",
+            default=False,
+        )
         runs = _ask_positive_int("Runs (to reduce variance)", default=100)
         matchups = math.comb(len(entries), 2)
         total_hands = runs * matchups * hands_per_match
@@ -509,6 +723,7 @@ def _run_round_robin() -> None:
 
         completed_runs_for_save = runs
     else:
+        shutdown_after = False
         stop_signal = _GracefulStopSignal(stop_word="stop")
         stop_signal.start()
 
@@ -559,6 +774,15 @@ def _run_round_robin() -> None:
     league_store.record_tournament(rows, runs=max(1, completed_runs_for_save))
     cumulative_rows = league_store.load_leaderboard(strategy_keys=deduped)
     _render_cumulative(cumulative_rows)
+    _send_discord_summary(
+        title="Round-Robin Arena",
+        sections=[
+            ("Session result", _format_tournament_lines(rows, hands_per_match, "Session ranking")),
+            ("Global result", _format_tournament_lines(cumulative_rows, hands_per_match, "Cumulative ranking")),
+        ],
+    )
+    if shutdown_after:
+        _post_run_commit_push_and_shutdown("round-robin")
 
 
 def _run_field_comparison() -> None:
@@ -596,6 +820,10 @@ def _run_field_comparison() -> None:
     equity_iterations = _ask_positive_int("Equity estimation iterations", default=1000)
 
     if exec_mode == "finite":
+        shutdown_after = Confirm.ask(
+            "Shutdown PC after completion (Discord + git commit/push)?",
+            default=False,
+        )
         tables = _ask_positive_int("Random tables to simulate", default=300)
 
         # Each table gets random seats with replacement (same strategy can appear multiple times).
@@ -657,6 +885,7 @@ def _run_field_comparison() -> None:
             )
         completed_tables_for_save = tables
     else:
+        shutdown_after = False
         tables_batch = _ask_positive_int("Tables per cycle (granularity of stop)", default=5)
         stop_signal = _GracefulStopSignal(stop_word="stop")
         stop_signal.start()
@@ -710,6 +939,15 @@ def _run_field_comparison() -> None:
     league_store.record_field_tournament(rows, simulations=max(1, completed_tables_for_save))
     cumulative_rows = league_store.load_field_leaderboard(strategy_keys=deduped)
     _render_field_cumulative(cumulative_rows)
+    _send_discord_summary(
+        title="Field Comparison Arena",
+        sections=[
+            ("Session result", _format_field_lines(rows, hands_per_table, "Session ranking")),
+            ("Global result", _format_field_leaderboard_lines(cumulative_rows, "Cumulative ranking")),
+        ],
+    )
+    if shutdown_after:
+        _post_run_commit_push_and_shutdown("field-comparison")
     ui.console.print(
         "[dim]Note: field ranking is stored separately from round-robin in bot_league_field.json.[/dim]"
     )
